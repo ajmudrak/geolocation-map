@@ -58,7 +58,8 @@ maphelper = {
                         callback({
                             country: country,
                             state: state,
-                            city: city
+                            city: city,
+                            locationinfo: locationinfo
                         });
                     }
                 }

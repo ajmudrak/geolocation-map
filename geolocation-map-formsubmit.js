@@ -27,7 +27,9 @@ mapform = {
                             mapform.options.addressGet(),
                             true,
                             function(address) {
-                                mapform.options.addressSet(address);
+                                if (address) {
+                                    mapform.options.addressSet(address);
+                                }
                                 $('[name="' + mapform.options.gpsElementName + '"]'
                                         , form).val(maphelper.getMapPosition());
                                 submitblock = false;
@@ -40,10 +42,12 @@ mapform = {
             if (mapform.options.autocompleteElementName) {
                 var jqAutocomplete = '[name="' + mapform.options.autocompleteElementName + '"]';
                 mapform.options.addressSet = function(address) {
-                    $(jqAutocomplete, form).val(
-                            address.city +
-                            ", " + address.state +
-                            ", " + address.country);
+                    if (address) {
+                        $(jqAutocomplete, form).val(
+                                (address.city ? address.city +
+                                ", " : "") + address.state +
+                                ", " + address.country);
+                    }
                 };
                 mapform.options.addressGet = function() {
                     return $(jqAutocomplete, form).val();

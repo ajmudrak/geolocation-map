@@ -10,7 +10,9 @@ mapform = {
     },
     update: function(updatetext, callback) {
         maphelper.updateMapWithAddress(mapform.options.addressGet(), updatetext, function(address) {
-            mapform.options.addressSet(address);
+            if (address) {
+                mapform.options.addressSet(address);
+            }
             if (typeof callback == 'function') {
                 callback();
             }
@@ -62,9 +64,9 @@ mapform = {
                     mapform.update(mapform.options.autocompleteWillUpdateText);
                 });
             }
+            maphelper.initCallback = mapform.options.addressSet;
+            maphelper.mapElementId = mapform.options.mapElementId;
+            maphelper.init();
         });
-        maphelper.initCallback = mapform.options.addressSet;
-        maphelper.mapElementId = mapform.options.mapElementId;
-        maphelper.init();
     }
 };

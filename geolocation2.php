@@ -25,12 +25,6 @@
             mapform.options.formId = 'theform';
             mapform.options.gpsElementName = 'latlng';
             mapform.options.autocompleteElementName = 'freeformaddress';
-//            mapform.options.addressSet = function(address) {
-//                $('#freeformaddress').val(address.city + ", " + address.state + ", " + address.country);
-//            };
-//            mapform.options.addressGet = function() {
-//                return $('#freeformaddress').val();
-//            };
             mapform.init();
         </script>
     </head>

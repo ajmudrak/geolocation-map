@@ -9,13 +9,13 @@ $country = $_REQUEST['country'];
 $countrystate_helper = new CountryState();
 $url = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 $referer = $_SERVER['HTTP_REFERER'];
-//if (!$referer) {
-//    die('Access denied.');
-//}
-//$referer_url = parse_url($referer);
-//if ($referer_url['host'] != $_SERVER['HTTP_HOST']) {
-//    die('Access denied.');
-//}
+if (!$referer) {
+    die('Access denied.');
+}
+$referer_url = parse_url($referer);
+if ($referer_url['host'] != $_SERVER['HTTP_HOST']) {
+    die('Access denied.');
+}
 switch ($type) {
     case 'json':
         header('Content-type: application/json; charset=utf-8');

@@ -1,13 +1,5 @@
 <?php
 
-require_once('countrystate.php');
-
-error_reporting(E_ERROR | E_USER_ERROR);
-
-$type = $_REQUEST['type'];
-$country = $_REQUEST['country'];
-$countrystate_helper = new CountryState();
-$url = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 $referer = $_SERVER['HTTP_REFERER'];
 if (!$referer) {
     die('Access denied.');
@@ -16,6 +8,22 @@ $referer_url = parse_url($referer);
 if ($referer_url['host'] != $_SERVER['HTTP_HOST']) {
     die('Access denied.');
 }
+
+require_once('countrystate.php');
+
+error_reporting(E_ERROR | E_USER_ERROR);
+
+$type = $_REQUEST['type'];
+$country = $_REQUEST['country'];
+$countryValues = $_REQUEST['country_values'];
+$stateValues = $_REQUEST['state_values'];
+
+$countrystate_helper = new CountryState();
+$countrystate_helper->useCodesForCountry = $countryValues != 'name';
+$countrystate_helper->useCodesForState = $stateValues != 'name';
+
+$url = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
 switch ($type) {
     case 'json':
         header('Content-type: application/json; charset=utf-8');

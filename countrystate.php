@@ -2,6 +2,9 @@
 
 class CountryState {
 
+    var $useCodesForCountry = true;
+    var $useCodesForState = true;
+    
     var $countrylist = null;
     var $statelist = null;
 
@@ -113,11 +116,11 @@ class CountryState {
                 for ($i = 1; $i <= $colcount; $i++) {
                     $item[$columns[$i - 1]] = $match[$i];
                 }
-                $ccode = strtoupper(trim($item['COUNTRY ISO CHAR 2 CODE']));
+                $ccode = $this->useCodesForCountry ? strtoupper(trim($item['COUNTRY ISO CHAR 2 CODE'])) : trim($item['COUNTRY NAME']);
                 if (!$statelist[$ccode]) {
                     $statelist[$ccode] = array();
                 }
-                $scode = preg_replace('@^' . $ccode . '-@', '', strtoupper(trim($item['ISO 3166-2 SUB-DIVISION/STATE CODE'])));
+                $scode = $this->useCodesForState ? preg_replace('@^' . $ccode . '-@', '', strtoupper(trim($item['ISO 3166-2 SUB-DIVISION/STATE CODE']))) : trim($item['ISO 3166-2 SUBDIVISION/STATE NAME']);
                 $statelist[$ccode][$scode] = preg_replace('@\s*\(see also separate entry under .*?\)@i', '', trim($item['ISO 3166-2 SUBDIVISION/STATE NAME']));
                 if (!$countrylist[$ccode]) {
                     $countrylist[$ccode] = trim($item['COUNTRY NAME']);
@@ -206,7 +209,7 @@ class CountryState {
         if (countrycode && !stateData[countrycode]) {
             $.ajax({
                 url: "' . str_replace('"', '\\"', $url) . '",
-                data: { type: "json", country: countrycode },
+                data: { type: "json", country: countrycode' . ($this->useCodesForCountry ? '' : ', country_values: "name"') . ($this->useCodesForState ? '' : ', state_values: "name"') . ' },
                 method: "GET",
                 success: function (data) {
                     stateData[countrycode] = data;

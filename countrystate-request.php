@@ -17,10 +17,14 @@ $type = $_REQUEST['type'];
 $country = $_REQUEST['country'];
 $countryValues = $_REQUEST['country_values'];
 $stateValues = $_REQUEST['state_values'];
+$countryid = $_REQUEST['country_id'];
+$stateid = $_REQUEST['state_id'];
 
 $countrystate_helper = new CountryState();
-$countrystate_helper->useCodesForCountry = $countryValues != 'name';
-$countrystate_helper->useCodesForState = $stateValues != 'name';
+$countrystate_helper->useCodesForCountry = $countryValues == 'code';
+$countrystate_helper->useCodesForState = $stateValues == 'code';
+$countryid = $countryid ? $countryid : 'country';
+$stateid = $stateid ? $stateid : 'state';
 
 $url = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
@@ -35,23 +39,27 @@ switch ($type) {
         break;
     case 'jquery':
         header('Content-type: text/html; charset=utf-8');
-        echo $countrystate_helper->outputJquery($url);
+        echo $countrystate_helper->outputJquery($url, $countryid, $stateid);
         break;
     case 'html-country':
         header('Content-type: text/html; charset=utf-8');
-        echo $countrystate_helper->outputCountrySelectHtml();
+        echo $countrystate_helper->outputCountrySelectHtml(true, $countryid);
         break;
     case 'html-state':
         header('Content-type: text/html; charset=utf-8');
-        echo $countrystate_helper->outputStateSelectHtml();
+        echo $countrystate_helper->outputStateSelectHtml($stateid);
         break;
     case 'html-jquery':
         header('Content-type: text/html; charset=utf-8');
-        echo $countrystate_helper->outputJqueryHtmlWithSelectLists($url);
+        echo $countrystate_helper->outputJqueryHtmlWithSelectLists($url, $countryid, $stateid);
+        break;
+    case 'html-static':
+        header('Content-type: text/html; charset=utf-8');
+        echo $countrystate_helper->outputStaticStateUpdateScript($countryid, $stateid);
         break;
     case 'html':
         header('Content-type: text/html; charset=utf-8');
-        echo $countrystate_helper->outputAllStaticHtml();
+        echo $countrystate_helper->outputAllStaticHtml($countryid, $stateid);
         break;
     case 'text':
     default:

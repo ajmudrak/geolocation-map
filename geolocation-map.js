@@ -15,6 +15,7 @@ maphelper = {
                 var locationinfo = results[0];
                 if (locationinfo) {
                     pos = locationinfo.geometry.location;
+                    posset = true;
                     maphelper.updateLocation(updatetext, callback);
                 }
             }

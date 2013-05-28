@@ -25,7 +25,7 @@
             mapform.options.mapElementId = 'map-canvas';
             mapform.options.formId = 'theform';
             mapform.options.gpsElementName = 'latlng';
-            mapform.options.autocompleteElementName = 'city';
+            mapform.options.autocompleteElementId = 'city';
             mapform.options.addressSet = function(address) {
                 if (address) {
                     var countrylist = $('#country');
@@ -62,9 +62,6 @@
                 }
             };
             mapform.init();
-            //            mapform.options.addressGet = function() {
-            //                return $('#state').val() + ',' + $('#country').val();
-            //            };
             $(function() {
                 $('#country').change(function() {
                     $('#state').val('');

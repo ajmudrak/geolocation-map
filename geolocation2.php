@@ -24,7 +24,7 @@
             mapform.options.mapElementId = 'map-canvas';
             mapform.options.formId = 'theform';
             mapform.options.gpsElementName = 'latlng';
-            mapform.options.autocompleteElementName = 'freeformaddress';
+            mapform.options.autocompleteElementId = 'freeformaddress';
             mapform.init();
         </script>
     </head>

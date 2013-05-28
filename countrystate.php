@@ -2,8 +2,8 @@
 
 class CountryState {
 
-    var $useCodesForCountry = true;
-    var $useCodesForState = true;
+    var $useCodesForCountry = false;
+    var $useCodesForState = false;
     
     var $countrylist = null;
     var $statelist = null;
@@ -21,37 +21,41 @@ class CountryState {
         echo json_encode($output);
     }
 
-    public function outputJquery($url) {
+    public function outputJquery($url, $countryid = 'country', $stateid = 'state') {
         if (!$url) {
             $url = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         }
-        return $this->html_jquery($url);
+        return $this->html_jquery($url, $countryid, $stateid);
     }
 
-    public function outputJqueryHtmlWithSelectLists($url) {
+    public function outputJqueryHtmlWithSelectLists($url, $countryid = 'country', $stateid = 'state') {
         if (!$url) {
             $url = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         }
         $this->createLists();
         return $this->html_country(true)
-                . $this->html_state()
-                . $this->html_jquery($url);
+                . $this->html_state($stateid)
+                . $this->html_jquery($url, $countryid, $stateid);
     }
 
-    public function outputCountrySelectHtml($unintrusiveJavascript = true) {
+    public function outputCountrySelectHtml($unintrusiveJavascript = true, $id = 'country') {
         $this->createLists();
-        return $this->html_country($unintrusiveJavascript);
+        return $this->html_country($unintrusiveJavascript, $id);
     }
 
-    public function outputStateSelectHtml() {
-        return $this->html_state();
+    public function outputStateSelectHtml($id = 'state') {
+        return $this->html_state($id);
+    }
+    
+    public function outputStaticStateUpdateScript($countryid = 'country', $stateid = 'state') {
+        return $this->html_updateStateListOptions($countryid, $stateid);
     }
 
-    public function outputAllStaticHtml() {
+    public function outputAllStaticHtml($countryid = 'country', $stateid = 'state') {
         $this->createLists();
-        return $this->html_country(false)
-                . $this->html_state()
-                . $this->html_updateStateListOptions();
+        return $this->html_country(false, $countryid)
+                . $this->html_state($stateid)
+                . $this->html_updateStateListOptions($countryid, $stateid);
     }
 
     public function outputText() {
@@ -72,7 +76,7 @@ class CountryState {
         // Text qualifier: Double quotes
         // Show column headers?: CHECKED
         // Include all columns: Country Name, ISO 3166-2 Sub-division/State Code, ISO 3166-2 Subdivision/State Name, ISO 3166-2 Primary Level Name, Subdivision/State Alternate Names, ISO 3166-2 Subdivision/State Code (with *), Subdivision CDH ID, Country CDH ID, Country ISO Char 2 Code, Country ISO Char 3 Code
-        $data = file_get_contents('countrystate-data.txt');
+        $data = file_get_contents(__DIR__ . '/countrystate-data.txt');
         $data = mb_convert_encoding($data, 'UTF-8', mb_detect_encoding($data, 'UTF-8, ISO-8859-1', true));
         $textqualifier = '"';
         $columns = array(
@@ -150,9 +154,9 @@ class CountryState {
         $this->statelist = $statelist;
     }
 
-    private function html_country($uninstrusive = false) {
+    private function html_country($uninstrusive = false, $id = 'country') {
         $output = '
-<select name="country" id="country"' . ($uninstrusive ? '' : ' onchange="javascript:updateStateListOptions();"') . '>
+<select name="' . htmlspecialchars($id) . '" id="' . htmlspecialchars($id) . '"' . ($uninstrusive ? '' : ' onchange="javascript:updateStateListOptions();"') . '>
   <option value="">[ Choose Country ]</option>' . "\n";
         foreach ($this->countrylist as $countryinfo) {
             $output .= '  <option value="' . htmlspecialchars($countryinfo['country_code']) . '">' . htmlspecialchars($countryinfo['country_name']) . '</option>' . "\n";
@@ -163,19 +167,19 @@ class CountryState {
         return $output;
     }
 
-    private function html_state() {
+    private function html_state($id = 'state') {
         return '
-<select name="state" id="state">
+<select name="' . htmlspecialchars($id) . '" id="' . htmlspecialchars($id) . '">
   <option value="">[ Choose State/Province ]</option>
 </select>
 ';
     }
 
-    private function script_updateStateListOptions() {
+    private function script_updateStateListOptions($countryid = 'country', $stateid = 'state') {
         return '
     var updateStateListOptions = function() {
-        var country = document.getElementById("country");
-        var state = document.getElementById("state");
+        var country = document.getElementById("' . str_replace('"', '\\"', $countryid) . '");
+        var state = document.getElementById("' . str_replace('"', '\\"', $stateid) . '");
         var countryVal = country.value;
         // clear state list
         state.selectedIndex = 0;
@@ -198,22 +202,29 @@ class CountryState {
 ';
     }
 
-    private function script_jquery($url) {
+    private function script_jquery($url, $countryid = 'country', $stateid = 'state') {
         return '
     var stateData = {};
     ' .
                 $this->script_updateStateListOptions() .
                 '
     var updateStateList = function(callback) {
-        var countrycode = $("#country").val();
+        var countrycode = $("#' . str_replace('"', '\\"', $countryid) . '").val();
         if (countrycode && !stateData[countrycode]) {
             $.ajax({
                 url: "' . str_replace('"', '\\"', $url) . '",
-                data: { type: "json", country: countrycode' . ($this->useCodesForCountry ? '' : ', country_values: "name"') . ($this->useCodesForState ? '' : ', state_values: "name"') . ' },
+                data: { 
+                    type: "json", 
+                    country: countrycode' 
+                . ($this->useCodesForCountry ? ', country_values: "code"' : '') 
+                . ($this->useCodesForState ? ', state_values: "code"' : '') 
+                . ($countryid == 'country' ? '' : ', country_id: "' . str_replace('"', '\\"', $countryid) . '"') 
+                . ($stateid == 'state' ? '' : ', state_id: "' . str_replace('"', '\\"', $stateid) . '"') 
+                . ' },
                 method: "GET",
                 success: function (data) {
                     stateData[countrycode] = data;
-                    if (countrycode == $("#country").val()) {
+                    if (countrycode == $("#' . str_replace('"', '\\"', $countryid) . '").val()) {
                         updateStateListOptions();
                     }
                     if (typeof callback == "function") {
@@ -229,28 +240,28 @@ class CountryState {
         }
     };
     $(function () {
-        $("#country").change(function () {
+        $("#' . str_replace('"', '\\"', $countryid) . '").change(function () {
             updateStateList();
         });
     });
     ';
     }
 
-    private function html_jquery($url) {
+    private function html_jquery($url, $countryid = 'country', $stateid = 'state') {
         return '
 <script type="text/javascript">
 ' .
-                $this->script_jquery($url) .
+                $this->script_jquery($url, $countryid, $stateid) .
                 '
 </script>
 ';
     }
 
-    private function html_updateStateListOptions() {
+    private function html_updateStateListOptions($countryid = 'country', $stateid = 'state') {
         return '
 <script type="text/javascript">
 ' .
-                $this->script_updateStateListOptions() .
+                $this->script_updateStateListOptions($countryid, $stateid) .
                 '
     var stateData = ' . json_encode($this->statelist) . ';
 </script>

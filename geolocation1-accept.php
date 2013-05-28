@@ -1,6 +1,6 @@
 <?php
 header('Content-type: text/plain; charset=utf-8');
-$results = $_REQUEST;
+$results = array_merge($_GET, $_POST);
 ?>
 Form results:
 <?php
